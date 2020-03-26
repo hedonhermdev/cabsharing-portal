@@ -1,0 +1,12 @@
+
+.idea/
+
+.vim/
+
+cabsharing/__pycache__/
+
+main/__pycache__/
+
+venv/
+
+main/migrations/__pycache__/
