@@ -55,3 +55,20 @@ def get_empty_group(request):
     
     return Response(empty_groups,status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+def listing_detail(request,id):
+    try:
+        required_listing = Listing.objects.get(pk=id)
+    except Listing.DoesNotExist:
+        return Response('Listing not found',status=status.HTTP_404_NOT_FOUND)
+    
+    return Response(required_listing.to_dict(),status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def group_detail(request,id):
+    try:
+        required_group = Group.objects.get(pk=id)
+    except:
+        return Response('Group not found',status=status.HTTP_404_NOT_FOUND)
+        
+    return Response(required_group.to_dict(),status=status.HTTP_200_OK)

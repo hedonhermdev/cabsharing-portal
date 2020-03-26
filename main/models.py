@@ -104,7 +104,7 @@ class Group(models.Model):
             'from_location': self.from_location,
             'start': self.start.isoformat(),
             'end': self.end.isoformat(),
-            'members': [m.pk for m in self.members.all()],
+            'members': [m.to_dict() for m in self.members.all()],
             'is_full': self.is_full,
         }
 
