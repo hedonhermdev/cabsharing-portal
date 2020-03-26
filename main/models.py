@@ -74,6 +74,12 @@ class Listing(models.Model):
         return f"Listing({self.lister}, {self.to_location}, {self.from_location})"
 
 
+class GroupManager(models.Manager):
+    def fav_groups(self,to_location,from_location):
+        return super(GroupManager,self).get_query_set().filter(is_full=False,to_location=to_location,from_location=from_location)
+
+
+
 class Group(models.Model):
 
     MAX_MEMBERS = 4
@@ -83,6 +89,8 @@ class Group(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField()
     is_full = models.BooleanField(default=False)
+
+    get = GroupManager()
 
     def save(self):
         if self.members.count() == self.MAX_MEMBERS:

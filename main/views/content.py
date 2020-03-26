@@ -6,6 +6,7 @@ from rest_framework import status
 
 from django.contrib.auth.models import User
 from main.models import Listing, Group
+from main.models import LOCATION_CHOICES
 
 
 @api_view(['GET',])
@@ -35,4 +36,22 @@ def user_listing(request):
     user = request.user
     my_listing = [l.to_dict() for l in user.listings.all()]
     return Response(my_listing,status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_empty_group(request):
+    to_location = request.GET.get('to_location')
+    from_location = request.GET.get('from_location')
+
+    allowed_loc = [x[0] for x in LOCATION_CHOICES]
+    #checking whether the locations are allowed
+
+    if (to_location not in allowed_loc ||from_location not in allowed_loc ):
+        return Response('Location is invalid',status=status.HTTP_400_BAD_REQUEST)
+    else :
+        validated_to = to_location
+        validated_from = from_location
+
+    empty_groups = [g.to_dict() for g in Group.get.fav_groups(to_location=validated_to,from_location=validated_from)]
+    
+    return Response(empty_groups,status=status.HTTP_200_OK)
 
