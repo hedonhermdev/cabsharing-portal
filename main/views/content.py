@@ -5,7 +5,7 @@ from rest_framework import status
 # Create your views here.
 
 from django.contrib.auth.models import User
-from .models import Listing, Group
+from main.models import Listing, Group
 
 
 @api_view(['GET',])

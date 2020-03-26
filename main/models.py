@@ -2,7 +2,7 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 
-from main.utils import find_overlap_range, find_num_hours, find_max_overlap_range
+from main.utils import find_overlap_range, find_max_overlap_range
 
 
 LOCATION_CHOICES = (
