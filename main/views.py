@@ -30,3 +30,8 @@ def add_listing(request):
     listing.save()
     return Response(listing.to_dict(), status=status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+def user_listing(request):
+    user = request.user
+    my_listing = [l.to_dict() for l in user.listings.all()]
+    return Response(my_listing,status=status.HTTP_200_OK)
