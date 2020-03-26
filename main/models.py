@@ -7,8 +7,9 @@ from main.utils import find_overlap_range, find_num_hours, find_max_overlap_rang
 
 LOCATION_CHOICES = (
     ("PIL", "PILANI"),
-    ("LOH", "LOHARU"),
-    ("DEL", "DELHI"),
+    ("LOH", "LOHARU Railway Station"),
+    ("IGI", "Delhi Airport"),
+    ("NDL", "New Delhi Railway Station"),
     ("JAI", "JAIPUR"),
 )
 
@@ -24,39 +25,53 @@ class Listing(models.Model):
     end = models.DateTimeField()
 
     def save(self):
-        if self.group:
-            super().save()
+        """
+        As soon as a listing is added, add it to an existing group or make a new group for it. 
+        """
 
         self_range = (self.start, self.end)
+
+        # Get list of potential groups.
         groups = Group.objects.filter(
             to_location=self.to_location,
             from_location=self.from_location,
             is_full=False,
         )
 
-        # No groups available, put listing in a new group
+        # List is empty, put listing in a new group
         if groups.count() == 0:
             g = Group(to_location=self.to_location,
                       from_location=self.from_location,
                       start=self.start,
                       end=self.end)
             self.group = g
+        # Filter it to find all overlapping groups. 
         else:
             list_of_ranges = [(g.start, g.end) for g in groups]
             max_range = find_max_overlap_range(self_range, list_of_ranges)
+            # Group with max overlap. (This can still be zero. )
             best_group = groups[list_of_ranges.index(max_range)]
+            # Find overlap
             overlap = find_overlap_range(self_range, max_range)
+
+            # Overlap exists. This is the group. This is the one you shouldve believed in. This one is your savior.
             if overlap:
                 self.group = best_group
                 self.group.start = overlap[0]
                 self.group.end = overlap[1]
+
+            # Overlap doesnt exist, make a new group. 
             else:
                 g = Group(to_location=self.to_location,
                           from_location=self.from_location,
                           start=self.start,
                           end=self.end)
                 self.group = g
+
+        # Django complains without this
         self.group.save()
+        
+        # Save the model now. 
         super().save()
 
     def to_dict(self):
@@ -82,6 +97,7 @@ class Group(models.Model):
     from_location = models.CharField(choices=LOCATION_CHOICES, max_length=3)
     start = models.DateTimeField()
     end = models.DateTimeField()
+    # Saving this to the database rather than making it a property method so that I can filter using this flag.
     is_full = models.BooleanField(default=False)
 
     def save(self):
