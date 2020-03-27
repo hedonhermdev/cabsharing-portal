@@ -47,6 +47,8 @@ def get_empty_group(request):
 
     if (to_location not in allowed_loc ||from_location not in allowed_loc ):
         return Response('Location is invalid',status=status.HTTP_400_BAD_REQUEST)
+    elif (to_location == from_location):
+        return Response('Travel locations are same',status=status.HTTP_400_BAD_REQUEST)
     else :
         validated_to = to_location
         validated_from = from_location
@@ -68,7 +70,7 @@ def listing_detail(request,id):
 def group_detail(request,id):
     try:
         required_group = Group.objects.get(pk=id)
-    except:
+    except Group.DoesNotExist:
         return Response('Group not found',status=status.HTTP_404_NOT_FOUND)
         
     return Response(required_group.to_dict(),status=status.HTTP_200_OK)
