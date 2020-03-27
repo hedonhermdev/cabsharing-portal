@@ -1,10 +1,12 @@
 from django.urls import path
 
-from . import views
-
+from .views import content, auth
 
 urlpatterns = [
-    path('api/get_listings', views.get_listings, name='get-listings'),
-    path('api/get_groups/', views.get_groups, name='get-groups'),
-    path('api/add_listing', views.add_listing, name='add-listing')
+    path('api/get_listings', content.get_listings, name='get-listings'),
+    path('api/get_groups/', content.get_groups, name='get-groups'),
+    path('api/add_listing', content.add_listing, name='add-listing'),
+
+    path('auth/login/', auth.login, name='auth-login'),
+    path('auth/register/', auth.register, name='auth-register'),
 ]
