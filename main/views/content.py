@@ -45,7 +45,7 @@ def get_empty_group(request):
     allowed_loc = [x[0] for x in LOCATION_CHOICES]
     #checking whether the locations are allowed
 
-    if (to_location not in allowed_loc ||from_location not in allowed_loc ):
+    if (to_location not in allowed_loc or from_location not in allowed_loc ):
         return Response('Location is invalid',status=status.HTTP_400_BAD_REQUEST)
     elif (to_location == from_location):
         return Response('Travel locations are same',status=status.HTTP_400_BAD_REQUEST)
