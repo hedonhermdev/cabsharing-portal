@@ -131,3 +131,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ),
 }
+
+JWT_AUTH = {
+    'JWT_VERIFY_EXPIRATION': False,
+}
