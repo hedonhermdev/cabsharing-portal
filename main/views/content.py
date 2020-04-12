@@ -12,6 +12,18 @@ from main.models import LOCATION_CHOICES
 
 from main.utils import find_num_hours_in_overlap, find_overlap_range
 
+import logging
+import sys
+
+# LOGGING 
+logging.basicConfig(filename='views.log', filemode='a', 
+                             format='%(asctime)s %(levelname)s\t%(message)s')
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
+
 
 @api_view(
     ["GET",]
@@ -22,6 +34,7 @@ from main.utils import find_num_hours_in_overlap, find_overlap_range
 def get_listings(request):
     print(request.user)
     listings = [l.to_dict() for l in Listing.objects.all()]
+    logging.debug(f"{request.path}: ALL LISTINGS {listings}")
     return Response(listings, status=status.HTTP_200_OK)
 
 
@@ -33,6 +46,7 @@ def get_listings(request):
 )
 def get_groups(request):
     groups = [g.to_dict() for g in Group.objects.all()]
+    logging.debug(f"{request.path}: GROUPS {groups}")
     return Response(groups, status=status.HTTP_200_OK)
 
 
@@ -44,13 +58,16 @@ def get_groups(request):
 )
 def add_listing(request):
     json_data = request.data
+
     listing = Listing()
-    listing.lister = User.objects.get(pk=json_data["lister"])
+    listing.lister = request.user
     listing.to_location = json_data["to_location"]
     listing.from_location = json_data["from_location"]
     listing.start = datetime.datetime.fromisoformat(json_data["start"])
     listing.end = datetime.datetime.fromisoformat(json_data["end"])
     listing.save()
+
+    logging.debug(f"{request.path}: NEW LISTING {listing.to_dict()}")
     return Response(listing.to_dict(), status=status.HTTP_201_CREATED)
 
 
@@ -64,6 +81,7 @@ def get_potential_groups(request, listing_id):
     try:
         listing = Listing.objects.get(pk=listing_id)
     except Listing.DoesNotExist:
+        logging.error("{request.path}: Listing with PK {listing_id} does not exist")
         return Response({'error': "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
 
     listing_range = (listing.start, listing.end)
@@ -96,7 +114,12 @@ def user_listings(request):
 def add_to_group(request, group_id):
     data = request.data
     
-    group = Group.objects.get(pk=group_id)
+    try:
+        group = Group.objects.get(pk=group_id)
+    except Group.DoesNotExist:
+        logging.error("{request.path}: Group with PK {listing_id} does not exist")
+        return Response({'error': "Group not found"}, status=status.HTTP_404_NOT_FOUND)
+        
     listing = Listing.objects.get(pk=data['listing_pk'])
     
     listing.group = group
@@ -110,6 +133,8 @@ def add_to_group(request, group_id):
     
     group.start = overlap_range[0]
     group.end = overlap_range[1]
+
+    logging.info("{request.path}: LISTING {listing.to_dict()} ADDED TO {group.to_dict()}")
 
     return Response(group.to_dict(), status=status.HTTP_200_OK)
 
