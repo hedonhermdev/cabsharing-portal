@@ -135,3 +135,7 @@ REST_FRAMEWORK = {
 JWT_AUTH = {
     'JWT_VERIFY_EXPIRATION': False,
 }
+
+
+# ---- CORS ----
+CORS_ORIGIN_ALLOW_ALL = True
