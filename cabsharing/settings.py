@@ -141,3 +141,40 @@ JWT_AUTH = {
 
 # ---- CORS ----
 CORS_ORIGIN_ALLOW_ALL = True
+
+#-----LOGGING-----
+
+INFOPATH = os.path.join(BASE_DIR, "main/logs/INFO.log")
+DEBUGPATH = os.path.join(BASE_DIR, "main/logs/DEBUG.log")
+LOGGING = {
+    'version':1,
+    'disable_existing_loggers':False, # to keep the Django logging system
+    'formatters':{
+        'default': {
+            'format':'TIME: %(asctime)s\nLEVEL: %(levelname)s\nMESSAGE: %(message)s\n'
+        }
+    },
+    'handlers':{
+        'info':{
+            'level':'INFO',
+            'formatter':'default',
+            'class':'logging.FileHandler',
+            'filename':INFOPATH
+        },
+        'debug':{
+            'level':'DEBUG',
+            'formatter':'default',
+            'class':'logging.FileHandler',
+            'filename':DEBUGPATH,
+            'mode':'w'
+        }
+        # until and unless someone adds some debug messages, the two will be the same.
+    },
+    'loggers':{
+        'viewlog':{
+            'level':'DEBUG',
+            'handlers':['info','debug'],
+            'propagate':True
+        }
+    }
+}

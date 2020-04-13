@@ -15,14 +15,7 @@ from main.utils import find_num_hours_in_overlap, find_overlap_range
 import logging
 import sys
 
-# LOGGING 
-logging.basicConfig(filename='views.log', filemode='a', 
-                             format='%(asctime)s %(levelname)s\t%(message)s')
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-logger.addHandler(handler)
+viewlog = logging.getLogger("viewlog")
 
 
 @api_view(
@@ -34,7 +27,7 @@ logger.addHandler(handler)
 def get_listings(request):
     print(request.user)
     listings = [l.to_dict() for l in Listing.objects.all()]
-    logging.debug(f"{request.path}: ALL LISTINGS {listings}")
+    viewlog.debug(f"{request.path}: ALL LISTINGS {listings}")
     return Response(listings, status=status.HTTP_200_OK)
 
 
@@ -46,7 +39,7 @@ def get_listings(request):
 )
 def get_groups(request):
     groups = [g.to_dict() for g in Group.objects.all()]
-    logging.debug(f"{request.path}: GROUPS {groups}")
+    viewlog.debug(f"{request.path}: GROUPS {groups}")
     return Response(groups, status=status.HTTP_200_OK)
 
 
@@ -67,9 +60,43 @@ def add_listing(request):
     listing.end = datetime.datetime.fromisoformat(json_data["end"])
     listing.save()
 
-    logging.debug(f"{request.path}: NEW LISTING {listing.to_dict()}")
+    viewlog.debug(f"{request.path}: NEW LISTING {listing.to_dict()}")
     return Response(listing.to_dict(), status=status.HTTP_201_CREATED)
 
+@api_view(
+    ["POST",]
+)
+@permission_classes(
+    [IsAuthenticated,]
+)
+def create_new_group(request,listing_id):
+    try:
+        listing = Listing.objects.get(pk=listing_id)
+    except Listing.DoesNotExist:
+        viewlog.error("{request.path}: Listing with PK {listing_id} does not exist")
+        return Response({'error': "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if listing.group is not None :
+        viewlog.error("{request.path}: Listing already in a Group")
+        return Response({'error':"Listing is already in a group"},status=status.HTTP_400_BAD_REQUEST) 
+
+    if listing.lister != request.user :
+        viewlog.error("{request.path}: Only lister of a listing can create a group for listing")
+        return Response({'error':"Only lister can create a group for a listing"},status=status.HTTP_400_BAD_REQUEST)
+
+    group = Group()
+    group.start = listing.start
+    group.end = listing.end
+    group.to_location = listing.to_location
+    group.from_location = listing.from_location
+
+    group.save()
+    
+    group.members.add(listing)
+
+    group.save()
+
+    return Response(group.to_dict(),status=status.HTTP_201_CREATED)
 
 @api_view(
     ["GET",]
@@ -81,7 +108,7 @@ def get_potential_groups(request, listing_id):
     try:
         listing = Listing.objects.get(pk=listing_id)
     except Listing.DoesNotExist:
-        logging.error("{request.path}: Listing with PK {listing_id} does not exist")
+        viewlog.error("{request.path}: Listing with PK {listing_id} does not exist")
         return Response({'error': "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
 
     listing_range = (listing.start, listing.end)
@@ -117,7 +144,7 @@ def add_to_group(request, group_id):
     try:
         group = Group.objects.get(pk=group_id)
     except Group.DoesNotExist:
-        logging.error("{request.path}: Group with PK {listing_id} does not exist")
+        viewlog.error("{request.path}: Group with PK {listing_id} does not exist")
         return Response({'error': "Group not found"}, status=status.HTTP_404_NOT_FOUND)
         
     listing = Listing.objects.get(pk=data['listing_pk'])
