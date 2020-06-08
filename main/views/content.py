@@ -152,6 +152,8 @@ def add_to_group(request, group_id):
 
 
 @api_view(["GET"])
+def listing_detail(request, id):
+    try:
         required_listing = Listing.objects.get(pk=id)
     except Listing.DoesNotExist:
         return Response("Listing not found", status=status.HTTP_404_NOT_FOUND)
