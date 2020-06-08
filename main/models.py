@@ -25,10 +25,14 @@ class Listing(models.Model):
     end = models.DateTimeField()
 
     def to_dict(self):
+        if self.group is None:
+            group_info = None
+        else :
+            group_info = self.group.pk
         return {
             "pk": self.pk,
             "lister": self.lister.pk,
-            "group": self.group.pk,
+            "group": group_info,
             "to_location": self.to_location,
             "from_location": self.from_location,
             "start": self.start.isoformat(),
