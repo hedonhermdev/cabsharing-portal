@@ -28,9 +28,6 @@ logger.addHandler(handler)
 @api_view(
     ["GET",]
 )
-@permission_classes(
-    [IsAuthenticated,]
-)
 def get_listings(request):
     print(request.user)
     listings = [l.to_dict() for l in Listing.objects.all()]
@@ -41,9 +38,6 @@ def get_listings(request):
 @api_view(
     ["GET",]
 )
-@permission_classes(
-    [IsAuthenticated,]
-)
 def get_groups(request):
     groups = [g.to_dict() for g in Group.objects.all()]
     logging.debug(f"{request.path}: GROUPS {groups}")
@@ -52,9 +46,6 @@ def get_groups(request):
 
 @api_view(
     ["POST",]
-)
-@permission_classes(
-    [IsAuthenticated,]
 )
 def add_listing(request):
     json_data = request.data
@@ -73,9 +64,6 @@ def add_listing(request):
 
 @api_view(
     ["GET",]
-)
-@permission_classes(
-    [IsAuthenticated,]
 )
 def get_potential_groups(request, listing_id):
     try:
@@ -98,9 +86,6 @@ def get_potential_groups(request, listing_id):
 
 
 @api_view(["GET"])
-@permission_classes(
-    [IsAuthenticated,]
-)
 def user_listings(request):
     user = request.user
     my_listing = [l.to_dict() for l in user.listings.all()]
@@ -140,9 +125,6 @@ def add_to_group(request, group_id):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated,])
-def listing_detail(request, id):
-    try:
         required_listing = Listing.objects.get(pk=id)
     except Listing.DoesNotExist:
         return Response("Listing not found", status=status.HTTP_404_NOT_FOUND)
