@@ -54,7 +54,7 @@ toml==0.10.0
 typed-ast==1.4.1
 uritemplate==3.0.1
 urllib3==1.25.8
-waitress==1.4.3
+waitress==2.1.1
 WebOb==1.8.6
 WebTest==2.0.34
 wrapt==1.11.2
